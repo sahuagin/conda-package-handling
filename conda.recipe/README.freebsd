@@ -1,0 +1,15 @@
+Steps that I followed to get this to build on FreeBSD 13.
+
+git clone https://github.com/conda/conda-package-handling.git
+cd conda-package-handling
+# modify static_build.sh
+cd /usr/ports/archivers/libarchive
+make fetch
+pkg install zstd
+mkdir -p build
+cd build
+tar xzvf /usr/ports/distfiles/libarchive-3.3.3.tar.gz
+SRC_DIR=${PWD} MAKE=gmake PREFIX=~/conda HOST=x86_64-unknown-freebsd CPU_COUND=1 AR=ar bash ../../static_build.sh
+
+# libarchive_and_deps.a is now in ~/conda/lib, as well as libarchive.a
+

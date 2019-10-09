@@ -1,8 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Build libarchive as a static library with support for the features needed for
 # conda-package-handling (bzip2, zlib, zstd).
 # This is not a general purpose libarchive.
+MAKE=${MAKE:-make}
 autoreconf -vfi
 mkdir build-${HOST} && pushd build-${HOST}
 ${SRC_DIR}/configure --prefix=${PREFIX}     \
@@ -23,8 +24,8 @@ ${SRC_DIR}/configure --prefix=${PREFIX}     \
                      --without-nettle       \
                      --without-openssl      \
                      --without-xml2
-make -j${CPU_COUNT} ${VERBOSE_AT}
-make install
+${MAKE} -j${CPU_COUNT} ${VERBOSE_AT}
+${MAKE} install
 popd
 
 # remove the man pages
@@ -56,6 +57,20 @@ if [[ ${HOST} =~ .*linux.* ]]; then
         ADDLIB libbz2.a
         ADDLIB libz.a
         ADDLIB libzstd.a
+        SAVE
+        END
+EOM
+    ranlib libarchive_and_deps.a
+    popd
+fi
+if [[ ${HOST} =~ .*freebsd.* ]]; then
+    pushd ${PREFIX}/lib
+    ${AR} -M <<EOM
+        CREATE libarchive_and_deps.a
+        ADDLIB libarchive.a
+        ADDLIB /usr/lib/libbz2.a
+        ADDLIB /usr/lib/libz.a
+        ADDLIB /usr/local/lib/libzstd.a
         SAVE
         END
 EOM
